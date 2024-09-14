@@ -43,11 +43,13 @@ find_file [options] <directory> <regex_pattern>
 ### Options
 
 - `-d, --directory <directory>`: Specify the directory to search in.
-- `-r, --regex <regex_pattern>`: Specify the regex pattern to filter file names.
+- `-f, --filter <filter_pattern>`: Specify the filter pattern to filter file names.
 - `-e, --exclude <exclude_pattern>`: Specify the pattern to exclude files.
 - `-a, --include-hidden`: Include hidden files in the search.
 - `-c, --content <content>`: Search for content within files.
-- `-v, --verbose`: Display detailed search parameters.
+- `-p, --parameter-show`: Display detailed search parameters.
+- `-h, --help`: Display help information.
+- `-v, --version`: Display version information.
 
 ### Examples
 
