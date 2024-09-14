@@ -66,21 +66,29 @@ fn main() {
     display_results(&args, &directories, all_files, all_permission_denied_dirs, other_error_occurred, error_messages);
 }
 
-fn search_content(file_path: &Path, filter_regexes: &[Regex]) -> io::Result<bool> {
-    let file = File::open(file_path)?;
-    let reader = BufReader::new(file);
-
-    for line in reader.lines() {
-        let line = line?;
-        if filter_regexes.iter().any(|re| re.is_match(&line)) {
-            return Ok(true);
-        }
-        
-    }
-
-    Ok(false)
-}
-
+/// Searches for files in the specified directory based on given criteria.
+///
+/// # Parameters
+///
+/// * `dir` - A reference to a `Path` representing the directory to search in.
+/// * `args` - A reference to `Args` containing the search criteria and options.
+/// * `filter_regexes` - A slice of `Regex` patterns to filter file names.
+///
+/// # Returns
+///
+/// A tuple containing:
+/// * `Vec<String>` - A list of matching file paths.
+/// * `Vec<String>` - A list of directories where permission was denied.
+/// * `bool` - Indicates if any other errors occurred during the search.
+/// * `String` - Contains error messages, if any.
+///
+/// # Example
+///
+/// ```
+/// let args = Args { /* ... */ };
+/// let filter_regexes = vec![Regex::new(r"\.txt$").unwrap()];
+/// let (files, denied_dirs, has_errors, error_msg) = search_files(Path::new("/home/user"), &args, &filter_regexes);
+/// ```
 fn search_files(dir: &Path, args: &Args, filter_regexes: &[Regex]) -> (Vec<String>, Vec<String>, bool, String) {
     let mut files = Vec::new();
     let mut permission_denied_dirs = Vec::new();
@@ -179,6 +187,68 @@ fn search_files(dir: &Path, args: &Args, filter_regexes: &[Regex]) -> (Vec<Strin
     (files, permission_denied_dirs, other_error_occurred, error_message)
 }
 
+/// Searches for content within a file based on given regex patterns.
+///
+/// # Parameters
+///
+/// * `file_path` - A reference to a `Path` representing the file to search in.
+/// * `filter_regexes` - A slice of `Regex` patterns to match against file content.
+///
+/// # Returns
+///
+/// A `Result` containing:
+/// * `Ok(bool)` - `true` if any regex pattern matches the file content, `false` otherwise.
+/// * `Err(io::Error)` - If there was an error reading the file.
+///
+/// # Example
+///
+/// ```
+/// let filter_regexes = vec![Regex::new(r"important").unwrap()];
+/// match search_content(Path::new("/path/to/file.txt"), &filter_regexes) {
+///     Ok(true) => println!("Content found"),
+///     Ok(false) => println!("Content not found"),
+///     Err(e) => eprintln!("Error searching file: {}", e),
+/// }
+/// ```
+fn search_content(file_path: &Path, filter_regexes: &[Regex]) -> io::Result<bool> {
+    let file = File::open(file_path)?;
+    let reader = BufReader::new(file);
+
+    for line in reader.lines() {
+        let line = line?;
+        if filter_regexes.iter().any(|re| re.is_match(&line)) {
+            return Ok(true);
+        }
+        
+    }
+
+    Ok(false)
+}
+
+/// Displays the search results and any errors that occurred during the search.
+///
+/// # Parameters
+///
+/// * `args` - A reference to `Args` containing the search criteria and options.
+/// * `directories` - A slice of `PathBuf` representing the directories searched.
+/// * `files` - A `Vec<String>` of matching file paths found.
+/// * `permission_denied_dirs` - A `Vec<String>` of directories where permission was denied.
+/// * `other_error_occurred` - A `bool` indicating if any other errors occurred.
+/// * `error_messages` - A `String` containing any error messages.
+///
+/// # Returns
+///
+/// This function doesn't return a value; it prints the results to the console.
+///
+/// # Example
+///
+/// ```
+/// let args = Args { /* ... */ };
+/// let directories = vec![PathBuf::from("/home/user")];
+/// let files = vec![String::from("/home/user/file.txt")];
+/// let permission_denied_dirs = vec![String::from("/root")];
+/// display_results(&args, &directories, files, permission_denied_dirs, false, String::new());
+/// ```
 fn display_results(args: &Args, directories: &[PathBuf], files: Vec<String>, permission_denied_dirs: Vec<String>, other_error_occurred: bool, error_messages: String) {
     if args.parameter_show {
         println!("\n{}", "Search Parameters:".bold());
@@ -226,4 +296,3 @@ fn display_results(args: &Args, directories: &[PathBuf], files: Vec<String>, per
 
     println!("\n{}", "Search completed.".bold());
 }
-
